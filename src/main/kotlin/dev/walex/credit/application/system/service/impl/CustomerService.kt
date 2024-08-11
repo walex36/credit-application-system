@@ -1,9 +1,10 @@
-package service.impl
+package dev.walex.credit.application.system.service.impl
 
 import dev.walex.credit.application.system.entity.Customer
+import dev.walex.credit.application.system.exception.BusinessException
 import dev.walex.credit.application.system.repository.CustomerRepository
 import org.springframework.stereotype.Service
-import service.ICustomerService
+import dev.walex.credit.application.system.service.ICustomerService
 
 @Service
 class CustomerService(private val customerRepository: CustomerRepository) : ICustomerService {
@@ -13,10 +14,13 @@ class CustomerService(private val customerRepository: CustomerRepository) : ICus
 
     override fun findById(id: Long): Customer {
         return this.customerRepository.findById(id).orElseThrow {
-            throw RuntimeException("Id $id not found")
+            throw BusinessException("Id $id not found")
         }
     }
 
-    override fun delete(id: Long) = this.customerRepository.deleteById(id)
+    override fun delete(id: Long) {
+        val customer: Customer = this.findById(id)
+        this.customerRepository.delete(customer)
+    }
 
 }

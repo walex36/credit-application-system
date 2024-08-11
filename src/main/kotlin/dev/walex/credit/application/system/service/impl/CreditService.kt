@@ -1,9 +1,11 @@
-package service.impl
+package dev.walex.credit.application.system.service.impl
 
 import dev.walex.credit.application.system.entity.Credit
+import dev.walex.credit.application.system.exception.BusinessException
 import dev.walex.credit.application.system.repository.CreditRepository
+import dev.walex.credit.application.system.service.ICreditService
 import org.springframework.stereotype.Service
-import service.ICreditService
+import java.time.LocalDate
 import java.util.*
 
 @Service
@@ -17,6 +19,11 @@ class CreditService(
             customer = customerService.findById(credit.customer?.id!!)
         }
 
+        val today = LocalDate.now()
+        val compare = credit.dayFirstInstallment.compareTo(other = today)
+        if (compare > 3)  throw BusinessException("Date Installment Invalid")
+
+
         return this.creditRepository.save(credit)
     }
 
@@ -26,8 +33,8 @@ class CreditService(
 
     override fun findByCreditCode(customerId: Long, creditCode: UUID): Credit {
         val credit: Credit = this.creditRepository.findByCreditCode(creditCode)
-            ?: throw RuntimeException("CreditCode $creditCode not found")
+            ?: throw BusinessException("CreditCode $creditCode not found")
 
-        return if (credit.customer?.id!! == customerId) credit else throw  RuntimeException("Contact admin")
+        return if (credit.customer?.id!! == customerId) credit else throw BusinessException("Contact admin")
     }
 }
